@@ -30,11 +30,11 @@
    - Performance benchmarks
 
 ## **Commands**
-1. `gogit fetch <user>` - Get repo list
-2. `gogit stats <user>` - Show statistics
-3. `gogit profile` - Run performance check
+   # Primary nouns
+   - gogit repo list <user>        # list repos
+   - gogit repo stats <user>       # deep repo statistics
 
-
-Start with client.go → fetch.go → main.go → stats.go
+   - gogit user view <user>        # show user profile card
+   - gogit user stats <user>       # follower/following, contributions, etc.
 
 ---

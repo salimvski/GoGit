@@ -10,10 +10,20 @@ import (
 type User struct {
     Login       string `json:"login"`
     Name        string `json:"name"`
+    AvatarURL   string `json:"avatar_url"`
+    Bio         string `json:"bio"`
+    Location    string `json:"location"`
+    HTMLURL     string `json:"html_url"`
+    CreatedAt   string `json:"created_at"`
     PublicRepos int    `json:"public_repos"`
 	ReposUrl 	string `json:"repos_url"`
     Followers   int    `json:"followers"`
     Following   int    `json:"following"`
+}
+
+var defaultHeaders = map[string]string{
+    "Accept":              "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
 }
 
 func GetUser(username string) (User, error) {
@@ -25,8 +35,9 @@ func GetUser(username string) (User, error) {
         return User{}, fmt.Errorf("creating request: %w", err)
     }
 
-	req.Header.Add("Accept", "application/vnd.github+json")
-    req.Header.Add("X-GitHub-Api-Version", "2022-11-28")
+	for k, v := range defaultHeaders {
+        req.Header.Add(k, v)
+    }
 
 	client := &http.Client{}
     resp, err := client.Do(req)
@@ -70,8 +81,9 @@ func GetUserRepos(repos_url string) ([]Repo, error) {
         return nil, fmt.Errorf("creating request: %w", err)
     }
 
-	req.Header.Add("Accept", "application/vnd.github+json")
-    req.Header.Add("X-GitHub-Api-Version", "2022-11-28")
+	for k, v := range defaultHeaders {
+        req.Header.Add(k, v)
+    }
 
 	client := &http.Client{}
     resp, err := client.Do(req)
@@ -94,10 +106,6 @@ func GetUserRepos(repos_url string) ([]Repo, error) {
 	if err := json.Unmarshal(body, &repos); err != nil {
         return nil, fmt.Errorf("parsing JSON: %w", err)
     }
-
-	// for _, repo := range repos {
-    //     fmt.Printf("Name: %s, Description: %s, Language: %s\n", repo.Name, repo.Description, repo.Language)
-    // }
 
 	return repos, nil
 }
