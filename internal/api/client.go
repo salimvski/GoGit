@@ -1,27 +1,27 @@
 package api
 
 import (
+	"encoding/json"
     "fmt"
     "io"
-    "log"
     "net/http"
 )
 
-
-type Repo struct {
+type User struct {
+    Login       string `json:"login"`
     Name        string `json:"name"`
-    Description string `json:"description"`
-    Stars       int    `json:"stargazers_count"`
-    Forks       int    `json:"forks_count"`
+    PublicRepos int    `json:"public_repos"`
+    Followers   int    `json:"followers"`
+    Following   int    `json:"following"`
 }
 
-func FetchUser(username string) ([]Repo, error) {
-    // TODO: HTTP GET to GitHub API
-	fetch_request := fmt.Sprintf("https://api.github.com/users/%s", username)
+func FetchUser(username string) (User, error) {
 
-	req, err := http.NewRequest("GET", fetch_request, nil)
+	url := fmt.Sprintf("https://api.github.com/users/%s", username)
+
+	req, err := http.NewRequest("GET", url, nil)
     if err != nil {
-        log.Fatal(err)
+        return User{}, fmt.Errorf("creating request: %w", err)
     }
 
 	req.Header.Add("Accept", "application/vnd.github+json")
@@ -30,12 +30,24 @@ func FetchUser(username string) ([]Repo, error) {
 	client := &http.Client{}
     resp, err := client.Do(req)
     if err != nil {
-        log.Fatal(err)
+        return User{}, fmt.Errorf("making request: %w", err)
     }
     defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+        return User{}, fmt.Errorf("API returned status: %d", resp.StatusCode)
+    }
     
-    body, _ := io.ReadAll(resp.Body)
-    fmt.Println(string(body))
-    // TODO: Parse JSON response
-	return nil, nil
+    body, err := io.ReadAll(resp.Body)
+	if err != nil {
+        return User{}, fmt.Errorf("reading response: %w", err)
+    }
+    
+	var user User
+
+	if err := json.Unmarshal(body, &user); err != nil {
+        return User{}, fmt.Errorf("parsing JSON: %w", err)
+    }
+
+	return user, nil
 }
