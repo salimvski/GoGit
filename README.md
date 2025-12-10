@@ -4,7 +4,7 @@
 1. **Fetch Basic Repo Info**
    - List user repositories
    - Show name, language, stars
-   - Handle API errors
+   - Handle API errors 
 
 2. **Concurrent Fetching**
    - Worker pool for parallel API calls

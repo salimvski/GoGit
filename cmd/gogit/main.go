@@ -1,11 +1,11 @@
 package main
 
 import (
-    "gogit/internal/api"
+    "gogit/internal/commands"
 )
 
 func main() {
     // TODO: Parse command line
-    api.FetchUser("salimvski")
+    commands.FetchUser("salimvski")
     // TODO: Route to commands
 }
