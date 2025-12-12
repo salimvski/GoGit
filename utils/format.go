@@ -164,3 +164,20 @@ func PrintUserStats(repos []api.Repo) {
     fmt.Printf("╚══════════════════════════════════════════╝\n")
 }
 
+
+func PrintUserRepos(repos []api.Repo) {
+	fmt.Println()
+	fmt.Printf("╔══════════════════════════════════════════════════════════════════════════════╗\n")
+	fmt.Printf("║                            REPOSITORY LIST                                   ║\n")
+	fmt.Printf("╚══════════════════════════════════════════════════════════════════════════════╝\n")
+	fmt.Println()
+
+	for i, repo := range repos {
+		fmt.Printf("%d. %s\n", i+1, repo.Name)
+		if repo.Description != "" {
+			fmt.Printf("   %s\n", repo.Description)
+		}
+		fmt.Printf("   Language: %s | Stars: %d | Forks: %d\n", repo.Language, repo.Stars, repo.Forks)
+		fmt.Println()
+	}
+}

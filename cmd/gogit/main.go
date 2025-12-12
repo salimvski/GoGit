@@ -19,6 +19,8 @@ func main() {
     switch args[0] {
         case "user":
             commands.UserCmd(args[1:])
+        case "repo":
+            commands.RepoCmd(args[1:])
         default:
             fmt.Printf("unknown command: %s\n", os.Args[1])
     }

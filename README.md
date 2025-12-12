@@ -32,9 +32,8 @@
 ## **Commands**
    # Primary nouns
    - gogit repo list <user>        # list repos
-   - gogit repo stats <user>       # deep repo statistics
 
-   - gogit user view <user>        # show user profile card
-   - gogit user stats <user>       # follower/following, contributions, etc.
+   - gogit user view <user>        # show user profile card DONE
+   - gogit user stats <user>       # follower/following, contributions, etc. DONE
 
 ---
