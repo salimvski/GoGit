@@ -8,6 +8,8 @@ import (
     "gogit/internal/api"
 )
 
+
+
 func RepoCmd(args []string) {
 
     if len(args) < 2 {
@@ -41,10 +43,25 @@ func RepoCmd(args []string) {
             fmt.Fprintf(os.Stderr, "error: %v\n", err)
             os.Exit(1)
         }
-        utils.PrintUserStats(repos)
+
+		repoURLs := make(chan string)
+
+		go func() {
+			for _, repo := range repos {
+				repoURLs <- repo.ContributorsURL
+			}
+			close(repoURLs) // Close when done
+		}()
+		
+
+		// for repoUrl := range repoURLs {
+		// 	api.GetRepoContributors(repo_url)
+		// }
+        
+
     default:
         fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", args[0])
-        fmt.Fprintf(os.Stderr, "available: view, stats\n")
+        fmt.Fprintf(os.Stderr, "available: list, stats\n")
         os.Exit(1)
     }
 }

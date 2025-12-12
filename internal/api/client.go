@@ -70,6 +70,7 @@ type Repo struct {
 	Language 	string `json:"language"`
     Stars       int    `json:"stargazers_count"`
     Forks       int    `json:"forks_count"`
+    ContributorsURL string `json:"contributors_url"`
 }
 
 func GetUserRepos(repos_url string) ([]Repo, error) {
@@ -108,4 +109,53 @@ func GetUserRepos(repos_url string) ([]Repo, error) {
     }
 
 	return repos, nil
+}
+
+type RepoContributors struct {
+    Name        string `json:"login"`
+    HTMLURL string `json:"html_url"`
+    Contributions   int `json:"contributions"`
+}
+
+type RepoWithContributors struct {
+    RepoName     string
+    Contributors []RepoContributors
+}
+
+func GetRepoContributors(repo_url string) ([]RepoContributors, error) {
+
+	url := repo_url
+
+	req, err := http.NewRequest("GET", url, nil)
+    if err != nil {
+        return nil, fmt.Errorf("creating request: %w", err)
+    }
+
+	for k, v := range defaultHeaders {
+        req.Header.Add(k, v)
+    }
+
+	client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        return nil, fmt.Errorf("making request: %w", err)
+    }
+    defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+        return nil, fmt.Errorf("API returned status: %d", resp.StatusCode)
+    }
+    
+    body, err := io.ReadAll(resp.Body)
+	if err != nil {
+        return nil, fmt.Errorf("reading response: %w", err)
+    }
+
+	var repoContributors []RepoContributors
+
+	if err := json.Unmarshal(body, &repoContributors); err != nil {
+        return nil, fmt.Errorf("parsing JSON: %w", err)
+    }
+
+	return repoContributors, nil
 }
