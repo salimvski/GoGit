@@ -3,8 +3,10 @@ package api
 import (
 	"encoding/json"
     "fmt"
+    "github.com/joho/godotenv"
     "io"
     "net/http"
+    "os"
 )
 
 type User struct {
@@ -21,9 +23,24 @@ type User struct {
     Following   int    `json:"following"`
 }
 
-var defaultHeaders = map[string]string{
-    "Accept":              "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
+var githubToken string
+var defaultHeaders map[string]string
+
+func init() {
+    err := godotenv.Load()
+    if err != nil {
+        fmt.Println("Error loading .env file:", err)
+    }
+    
+    // Now get the token
+    githubToken = os.Getenv("GITHUB_TOKEN")
+    
+    // Now create headers with the token
+    defaultHeaders = map[string]string{
+        "Authorization":        "token " + githubToken,
+        "Accept":               "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
 }
 
 func GetUser(username string) (User, error) {

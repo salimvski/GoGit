@@ -6,6 +6,7 @@ import (
     "os"
     "gogit/utils"
     "gogit/internal/api"
+    "sync"
 )
 
 
@@ -44,20 +45,54 @@ func RepoCmd(args []string) {
             os.Exit(1)
         }
 
-		repoURLs := make(chan string)
+        var allRepos []api.RepoWithContributors
 
-		go func() {
-			for _, repo := range repos {
-				repoURLs <- repo.ContributorsURL
-			}
-			close(repoURLs) // Close when done
-		}()
-		
+        var wg sync.WaitGroup
 
-		// for repoUrl := range repoURLs {
-		// 	api.GetRepoContributors(repo_url)
-		// }
-        
+        inputRepoChan := make(chan api.Repo)
+        outputRepoChan := make(chan api.RepoWithContributors)
+
+        go func() {
+            for _, repo := range repos {
+                inputRepoChan <- repo
+            }
+            close(inputRepoChan)
+        }()
+
+        for i:= 0; i < 5; i++ {
+            wg.Add(1)
+
+            go func() {
+                defer wg.Done()
+
+                for repo := range inputRepoChan {
+                    contributors, err := api.GetRepoContributors(repo.ContributorsURL)
+
+                    if err != nil {
+                        fmt.Printf("Error fetching contributors: %v\n", err)
+                        continue
+                    }
+
+                    outputRepoChan <- api.RepoWithContributors{
+                        RepoName:     repo.Name,
+                        Contributors: contributors,
+                    }
+
+                }
+            }()
+        }
+
+        go func() {
+            wg.Wait()
+            close(outputRepoChan)
+        }()
+
+        for result := range outputRepoChan {
+            allRepos = append(allRepos, result)
+        }
+
+        utils.PrintAllReposWithContributors(allRepos)
+    
 
     default:
         fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", args[0])

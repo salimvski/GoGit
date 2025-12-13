@@ -181,3 +181,47 @@ func PrintUserRepos(repos []api.Repo) {
 		fmt.Println()
 	}
 }
+
+
+func PrintRepoWithContributors(data api.RepoWithContributors) {
+	fmt.Println()
+	fmt.Printf("╔══════════════════════════════════════════════════════════════════════════════╗\n")
+	fmt.Printf("║ Repository: %-66s ║\n", data.RepoName)
+	fmt.Printf("╠══════════════════════════════════════════════════════════════════════════════╣\n")
+	fmt.Printf("║ Total Contributors: %-56d ║\n", len(data.Contributors))
+	fmt.Printf("╚══════════════════════════════════════════════════════════════════════════════╝\n")
+	fmt.Println()
+
+	if len(data.Contributors) == 0 {
+		fmt.Println("  No contributors found.")
+		return
+	}
+
+	for i, contributor := range data.Contributors {
+		fmt.Printf("  %d. %-30s Contributions: %d\n", 
+			i+1, 
+			contributor.Name, 
+			contributor.Contributions)
+	}
+	fmt.Println()
+}
+
+// PrintAllReposWithContributors displays all repos with their contributors
+func PrintAllReposWithContributors(allRepos []api.RepoWithContributors) {
+	fmt.Println()
+	fmt.Printf("╔══════════════════════════════════════════════════════════════════════════════╗\n")
+	fmt.Printf("║                     REPOSITORIES WITH CONTRIBUTORS                           ║\n")
+	fmt.Printf("╚══════════════════════════════════════════════════════════════════════════════╝\n")
+
+	totalContributors := 0
+	for _, repo := range allRepos {
+		totalContributors += len(repo.Contributors)
+	}
+
+	fmt.Printf("\nTotal Repositories: %d\n", len(allRepos))
+	fmt.Printf("Total Contributors: %d\n\n", totalContributors)
+
+	for _, repo := range allRepos {
+		PrintRepoWithContributors(repo)
+	}
+}
