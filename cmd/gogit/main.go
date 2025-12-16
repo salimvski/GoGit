@@ -3,11 +3,17 @@ package main
 import (
     "fmt"
     "os"
+    "gogit/internal/api"
     "gogit/internal/commands"
 )
 
 func main() {
 
+    if err := api.InitCache(); err != nil {
+		fmt.Println("Error initializing cache:", err)
+		os.Exit(1)
+	}
+    
     if len(os.Args) < 2 {
         fmt.Fprintf(os.Stderr, "usage: gogit repo <list|stats> <username>\n")
         fmt.Fprintf(os.Stderr, "usage: gogit user <view|stats> <username>\n")

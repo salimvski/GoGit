@@ -6,7 +6,7 @@ import (
     "sort"
     "strings"
     "time"
-	"gogit/internal/api"
+	"gogit/internal/models"
 )
 
 func nullString(s string) string {
@@ -42,7 +42,7 @@ func formatDate(dateStr string) string {
     return t.Format("Jan 2006")
 }
 
-func PrintProfileCard(u api.User) {
+func PrintProfileCard(u *models.User) {
     fmt.Printf("╔══════════════════════════════════════════╗\n")
     fmt.Printf("║           GITHUB PROFILE                ║\n")
     fmt.Printf("╠══════════════════════════════════════════╣\n")
@@ -88,7 +88,7 @@ func activityBadge(stars int) string {
 }
 
 
-func PrintUserStats(repos []api.Repo) {
+func PrintUserStats(repos []models.Repo) {
 
     if len(repos) == 0 {
         fmt.Println("No repositories found.")
@@ -165,7 +165,7 @@ func PrintUserStats(repos []api.Repo) {
 }
 
 
-func PrintUserRepos(repos []api.Repo) {
+func PrintUserRepos(repos []models.Repo) {
 	fmt.Println()
 	fmt.Printf("╔══════════════════════════════════════════════════════════════════════════════╗\n")
 	fmt.Printf("║                            REPOSITORY LIST                                   ║\n")
@@ -183,7 +183,7 @@ func PrintUserRepos(repos []api.Repo) {
 }
 
 
-func PrintRepoWithContributors(data api.RepoWithContributors) {
+func PrintRepoWithContributors(data models.RepoWithContributors) {
 	fmt.Println()
 	fmt.Printf("╔══════════════════════════════════════════════════════════════════════════════╗\n")
 	fmt.Printf("║ Repository: %-66s ║\n", data.RepoName)
@@ -207,7 +207,7 @@ func PrintRepoWithContributors(data api.RepoWithContributors) {
 }
 
 // PrintAllReposWithContributors displays all repos with their contributors
-func PrintAllReposWithContributors(allRepos []api.RepoWithContributors) {
+func PrintAllReposWithContributors(allRepos []models.RepoWithContributors) {
 	fmt.Println()
 	fmt.Printf("╔══════════════════════════════════════════════════════════════════════════════╗\n")
 	fmt.Printf("║                     REPOSITORIES WITH CONTRIBUTORS                           ║\n")

@@ -7,21 +7,8 @@ import (
     "io"
     "net/http"
     "os"
+    "gogit/internal/models"
 )
-
-type User struct {
-    Login       string `json:"login"`
-    Name        string `json:"name"`
-    AvatarURL   string `json:"avatar_url"`
-    Bio         string `json:"bio"`
-    Location    string `json:"location"`
-    HTMLURL     string `json:"html_url"`
-    CreatedAt   string `json:"created_at"`
-    PublicRepos int    `json:"public_repos"`
-	ReposUrl 	string `json:"repos_url"`
-    Followers   int    `json:"followers"`
-    Following   int    `json:"following"`
-}
 
 var githubToken string
 var defaultHeaders map[string]string
@@ -43,13 +30,17 @@ func init() {
     }
 }
 
-func GetUser(username string) (User, error) {
+func GetUser(username string) (*models.User, error) {
+
+    if user, err := getCachedUser(username); err == nil {
+        return user, nil
+    }
 
 	url := fmt.Sprintf("https://api.github.com/users/%s", username)
 
 	req, err := http.NewRequest("GET", url, nil)
     if err != nil {
-        return User{}, fmt.Errorf("creating request: %w", err)
+        return nil, fmt.Errorf("creating request: %w", err)
     }
 
 	for k, v := range defaultHeaders {
@@ -59,38 +50,31 @@ func GetUser(username string) (User, error) {
 	client := &http.Client{}
     resp, err := client.Do(req)
     if err != nil {
-        return User{}, fmt.Errorf("making request: %w", err)
+        return nil, fmt.Errorf("making request: %w", err)
     }
     defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-        return User{}, fmt.Errorf("API returned status: %d", resp.StatusCode)
+        return nil, fmt.Errorf("API returned status: %d", resp.StatusCode)
     }
     
     body, err := io.ReadAll(resp.Body)
 	if err != nil {
-        return User{}, fmt.Errorf("reading response: %w", err)
+        return nil, fmt.Errorf("reading response: %w", err)
     }
 
-	var user User
+	var user models.User
 
 	if err := json.Unmarshal(body, &user); err != nil {
-        return User{}, fmt.Errorf("parsing JSON: %w", err)
+        return nil, fmt.Errorf("parsing JSON: %w", err)
     }
 
-	return user, nil
+    cacheUser(username, &user, 1800)
+
+	return &user, nil
 }
 
-type Repo struct {
-    Name        string `json:"name"`
-    Description string `json:"description"`
-	Language 	string `json:"language"`
-    Stars       int    `json:"stargazers_count"`
-    Forks       int    `json:"forks_count"`
-    ContributorsURL string `json:"contributors_url"`
-}
-
-func GetUserRepos(repos_url string) ([]Repo, error) {
+func GetUserRepos(repos_url string) ([]models.Repo, error) {
 
 	url := repos_url
 
@@ -119,7 +103,7 @@ func GetUserRepos(repos_url string) ([]Repo, error) {
         return nil, fmt.Errorf("reading response: %w", err)
     }
 
-	var repos []Repo
+	var repos []models.Repo
 
 	if err := json.Unmarshal(body, &repos); err != nil {
         return nil, fmt.Errorf("parsing JSON: %w", err)
@@ -128,18 +112,7 @@ func GetUserRepos(repos_url string) ([]Repo, error) {
 	return repos, nil
 }
 
-type RepoContributors struct {
-    Name        string `json:"login"`
-    HTMLURL string `json:"html_url"`
-    Contributions   int `json:"contributions"`
-}
-
-type RepoWithContributors struct {
-    RepoName     string
-    Contributors []RepoContributors
-}
-
-func GetRepoContributors(repo_url string) ([]RepoContributors, error) {
+func GetRepoContributors(repo_url string) ([]models.RepoContributors, error) {
 
 	url := repo_url
 
@@ -168,7 +141,7 @@ func GetRepoContributors(repo_url string) ([]RepoContributors, error) {
         return nil, fmt.Errorf("reading response: %w", err)
     }
 
-	var repoContributors []RepoContributors
+	var repoContributors []models.RepoContributors
 
 	if err := json.Unmarshal(body, &repoContributors); err != nil {
         return nil, fmt.Errorf("parsing JSON: %w", err)

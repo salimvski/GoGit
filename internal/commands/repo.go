@@ -6,6 +6,7 @@ import (
     "os"
     "gogit/utils"
     "gogit/internal/api"
+    "gogit/internal/models"
     "sync"
 )
 
@@ -45,12 +46,12 @@ func RepoCmd(args []string) {
             os.Exit(1)
         }
 
-        var allRepos []api.RepoWithContributors
+        var allRepos []models.RepoWithContributors
 
         var wg sync.WaitGroup
 
-        inputRepoChan := make(chan api.Repo)
-        outputRepoChan := make(chan api.RepoWithContributors)
+        inputRepoChan := make(chan models.Repo)
+        outputRepoChan := make(chan models.RepoWithContributors)
 
         go func() {
             for _, repo := range repos {
@@ -73,7 +74,7 @@ func RepoCmd(args []string) {
                         continue
                     }
 
-                    outputRepoChan <- api.RepoWithContributors{
+                    outputRepoChan <- models.RepoWithContributors{
                         RepoName:     repo.Name,
                         Contributors: contributors,
                     }
